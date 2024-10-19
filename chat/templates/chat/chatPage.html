@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat Page</title>
+    <style>
+        /* Basic styles for the chat interface */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        #chat-log {
+            height: 300px;
+            overflow-y: scroll;
+            border: 1px solid #ccc;
+            padding: 10px;
+            background-color: #fff;
+        }
+        #chat-message-input {
+            width: 300px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome to the Chat!</h1>
+    <div id="chat-log"></div>
+    <input id="chat-message-input" type="text" placeholder="Type a message...">
+    <button id="chat-message-submit">Send</button>
+
+    <script>
+        // Create a new WebSocket connection
+        const chatSocket = new WebSocket('ws://localhost:8000/ws/chat/');
+    
+        // Event handler for when the connection is opened
+        chatSocket.onopen = function(event) {
+            console.log('WebSocket connection established.');
+        };
+    
+        // Event handler for receiving messages from the server
+        chatSocket.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            console.log('Message from server:', data);
+        };
+    
+        // Event handler for errors
+        chatSocket.onerror = function(event) {
+            console.error('WebSocket error observed:', event);
+        };
+    
+        // Event handler for when the connection is closed
+        chatSocket.onclose = function(event) {
+            console.log('WebSocket connection closed:', event);
+            if (!event.wasClean) {
+                console.error(`Connection closed unexpectedly: code=${event.code}, reason=${event.reason}`);
+            }
+        };
+    
+        // Example function to send a message
+        function sendMessage(message) {
+            if (chatSocket.readyState === WebSocket.OPEN) {
+                chatSocket.send(JSON.stringify({ message }));
+            } else {
+                console.error('WebSocket is not open. Ready state:', chatSocket.readyState);
+            }
+        }
+    
+        // Send a test message (you can call this function to test sending a message)
+        sendMessage("Hello, server!");
+    </script>
+</body>
+</html>
